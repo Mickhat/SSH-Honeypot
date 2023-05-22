@@ -3,23 +3,35 @@ import threading
 import datetime
 import socket
 import signal
+import requests
+import json
 import sys
 from discord_webhook import DiscordWebhook, DiscordEmbed
 
 WEBHOOK_URL = "URL"
 
 def log_credentials(username, password, ip):
+
+    #get geolocation of the client IP
+    request_url = 'https://geolocation-db.com/jsonp/' + ip
+    response = requests.get(request_url)
+    result = response.content.decode()
+    result = result.split("(")[1].strip(")")
+    result  = json.loads(result)
+    #print(result)
+
     timestamp = datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S')
     with open('credentials.log', 'a') as f:
         f.write(f'Timestamp: {timestamp}\n')
         f.write(f'Username: {username}\n')
         f.write(f'Password: {password}\n')
         f.write(f'IP: {ip}\n')
+        f.write(f'Geolocation: {result}\n')
         f.write('\n')
 
     # Send credentials and IP to Discord webhook
     webhook = DiscordWebhook(url=WEBHOOK_URL)
-    embed = DiscordEmbed(title="SSH Honeypot | New SSH login attempt:", description=f"**Timestamp:** {timestamp}\n**Username:** {username}\n**Password:** {password}\n**IP:** {ip}")
+    embed = DiscordEmbed(title="SSH Honeypot | New SSH login attempt:", description=f"**Timestamp:** {timestamp}\n**Username:** {username}\n**Password:** {password}\n**IP:** {ip}\n**Password:** {password}\n**Geolocation:** {result['country_name']}")
     embed.set_footer(text="Coded by Mickhat#1337")
     webhook.add_embed(embed)
     webhook.execute()
